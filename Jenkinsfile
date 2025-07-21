@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'maven3.6'
+        maven 'maven3'
         jdk 'jdk17'
         }
 	environment{
@@ -40,7 +40,7 @@ pipeline {
         stage('Quality_Gate') {
             steps {
 				script{
-				waitForQualityGate abortPipeline: False, credentialsId: 'sonar-token'
+				waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
 				}
              
 			}
@@ -59,15 +59,29 @@ pipeline {
              
 			}
 		}
-		
-        stage('Build and Tag Docker') {
+		stage('Build and Tag Docker') {
+             steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
+                    sh 'docker build -t mydeendevops369/automation:latest .'
+							}
+						}
+					}
+				}
+		stage('File Docker Scan') {
             steps {
-					withDockerRegistry(credentialsId: 'docker-cred' , toolName: 'docker') {
-					sh 'docker build -t mydeendevops369/automation:latest .'
-                }
-             
+             sh 'trivy image --format table -o trivy-fs-report.html mydeendevops369/automation:latest'
 			}
 		}
+		stage('Push') {
+             steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
+                    sh 'docker push mydeendevops369/automation:latest '
+							}
+						}
+					}
+				}
     }
 }
 
