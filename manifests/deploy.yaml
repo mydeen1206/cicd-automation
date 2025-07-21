@@ -26,19 +26,6 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "500m"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 20
-
 ---
 
 apiVersion: v1
@@ -53,6 +40,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
-  type: NodePort
+  type: ClusterIP
 
 ---
